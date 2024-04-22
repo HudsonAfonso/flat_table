@@ -5,5 +5,6 @@ library flat_table;
 
 export 'src/flat_table/models/flat_table_ctrl.dart';
 export 'src/flat_table/models/list_provider.dart';
+export 'src/flat_table/models/option.dart';
 export 'src/flat_table/widgets/flat_table.dart';
 export 'src/flat_table/widgets/flat_table_view.dart';
