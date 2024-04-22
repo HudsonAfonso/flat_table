@@ -1,0 +1,26 @@
+name: flat_table_example
+description: 'A sample application that uses FlatTableView'
+publish_to: 'none'
+
+# The following defines the version and build number for your application.
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.1 <4.0.0'
+  flutter: '>=3.19.3'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flat_table:
+    path: ../
+  material_symbols_icons: any
+
+dev_dependencies:
+  ## lint
+  dart_code_linter: 1.1.3
+  flutter_lints: 3.0.2
+
+# The following section is specific to Flutter packages.
+flutter:
+  uses-material-design: true
