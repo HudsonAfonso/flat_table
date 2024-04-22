@@ -7,7 +7,6 @@ extension EmptyExtension on Object? {
 
 class ListProvider with ChangeNotifier {
   ListProvider({
-    required this.name,
     List<SimpleType>? meta,
     List<List<dynamic>>? data,
   }) {
@@ -16,20 +15,16 @@ class ListProvider with ChangeNotifier {
   }
 
   factory ListProvider.fromJson(Map<String, dynamic> json) => ListProvider(
-        name: json['name'],
         meta: SimpleType.fromJsonList(json['meta']),
         data: List<List<dynamic>>.from(
           json['data'].map((dynamic x) => List<dynamic>.from(x.map((dynamic x) => x))),
         ),
       );
 
-  final String name;
-
   late List<List<dynamic>> data;
   late List<SimpleType> meta;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'name': name,
         'meta': List<dynamic>.from(meta.map((SimpleType x) => x.toJson())),
         'data': List<dynamic>.from(data.map((List<dynamic> x) => List<dynamic>.from(x.map((dynamic x) => x)))),
       };

@@ -39,8 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: FlatTableView(
         ctrl: FlatTableCtrl(
+          name: 'Demo',
           provider: ListProvider(
-            name: 'Demo',
             meta: <SimpleType>[
               SimpleType(index: 0, builtInType: 'string', columnLabel: 'Weapon', name: 'Weapon'),
               SimpleType(index: 1, builtInType: 'string', columnLabel: 'Type', name: 'Type'),

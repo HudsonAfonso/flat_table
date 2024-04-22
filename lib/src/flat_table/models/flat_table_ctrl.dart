@@ -16,6 +16,7 @@ typedef OnSelect = void Function(List<dynamic>);
 
 class FlatTableCtrl with ChangeNotifier {
   FlatTableCtrl({
+    required this.name,
     required this.provider,
     this.formatters,
     this.refresh,
@@ -27,6 +28,7 @@ class FlatTableCtrl with ChangeNotifier {
   }
 
   final bool multiSelect;
+  final String name;
   final ListProvider provider;
 
   Map<String, Formatter>? formatters;
@@ -217,7 +219,7 @@ class FlatTableCtrl with ChangeNotifier {
     final Uint8List bytes = await compute<Map<String, dynamic>, Uint8List>(encodeXlsx, toVisibleJson());
     final String path = await FileSaver.instance.saveFile(
       bytes: Uint8List.fromList(bytes),
-      name: provider.name.toLowerCase().snakeCase,
+      name: name.toLowerCase().snakeCase,
       ext: 'xlsx',
       mimeType: MimeType.microsoftExcel,
     );
