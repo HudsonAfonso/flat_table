@@ -45,6 +45,7 @@ class FlatTableCtrl with ChangeNotifier {
   List<SimpleType>? _cachedColumns;
   List<int>? _cachedIndices;
   List<List<dynamic>>? _cachedRows;
+  bool _disposed = false;
 
   List<SimpleType> get columns => _cachedColumns ??= provider.meta.where((SimpleType c) => c.visible).toList();
 
@@ -213,6 +214,13 @@ class FlatTableCtrl with ChangeNotifier {
     notifyListeners();
   }
 
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
   Future<void> save() async {
     loading.value = true;
 
@@ -308,11 +316,15 @@ class FlatTableCtrl with ChangeNotifier {
         invalidateState();
       }
       loading.value = false;
+      if (!_disposed) {
+        loading.value = false;
+      }
     }
   }
 
   @override
   void dispose() {
+    _disposed = true;
     super.dispose();
 
     loading.dispose();
