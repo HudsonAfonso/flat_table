@@ -23,7 +23,7 @@ class FlatTableView extends StatelessWidget {
     @Deprecated('Use [actions]') this.novoAction,
     this.actions = const <Widget>[],
     this.filters = const <Widget>[],
-    this.showConfig = true,
+    this.showConfig = false,
     this.showHeader = true,
     this.builders = const <String, CustomCellBuilder>{},
   });

@@ -74,7 +74,7 @@ class FlatTableCtrl with ChangeNotifier {
         ).toList();
         final List<List<dynamic>> result = TextSearch<List<dynamic>>(searchableItems).fastSearch(
           textFilter.value,
-          matchThreshold: 0.7,
+          matchThreshold: 1.5,
         );
         if (result.isNotEmpty) _cachedRows = result;
       }

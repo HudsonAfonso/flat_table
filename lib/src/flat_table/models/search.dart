@@ -43,7 +43,7 @@ class TextSearchResult<T> {
 class TextSearch<T> {
   TextSearch(this.items);
 
-  // static final JaroWinkler _editDistance = JaroWinkler();
+  static final JaroWinkler _editDistance = JaroWinkler();
 
   final List<TextSearchItem<T>> items;
 
@@ -90,133 +90,120 @@ class TextSearch<T> {
   }
 
   double _scoreTerm(String searchTerm, TextSearchItemTerm itemTerm) {
+    if (itemTerm.term.length == 1) {
+      return searchTerm.startsWith(itemTerm.term) ? itemTerm.scorePenalty + 0 : 4;
+    }
     searchTerm = searchTerm.toLowerCase();
     final String term = itemTerm.term.toLowerCase();
-
-    // print(searchTerm);
-    // print(term);
-
-    if (term.contains(searchTerm)) {
+    if (searchTerm == term) {
+      // print(0 + itemTerm.scorePenalty);
       return itemTerm.scorePenalty + 0;
     }
+    // Direct comparison (regardless of word or sentence).
+    final double initialScore =
+        _editDistance.distance(searchTerm.toLowerCase(), term.toLowerCase()) * searchTerm.length;
+    if (!term.contains(' ')) {
+      return initialScore + itemTerm.scorePenalty;
+    }
+    if (term.startsWith(searchTerm)) {
+      return math.max(0.05, 0.5 - searchTerm.length / term.length) + itemTerm.scorePenalty;
+    }
+    if (term.contains(searchTerm)) {
+      // print(math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty);
+      return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
+    }
+    // Compare to sentences by splitting to each component word.
+    final List<String> words = term.split(' ');
+    final Iterable<String> consideredWords = words.where((String word) => word.length > 1);
+    if (consideredWords.isEmpty) {
+      return itemTerm.scorePenalty;
+    }
+    final double perWordScore = consideredWords
+        .map(
+          (String word) =>
+              // Penalize longer sentences and avoid multiply by 0 (exact match).
+              math.sqrt(words.length + 1) *
+              (0.1 + _scoreTerm(searchTerm, TextSearchItemTerm(word, itemTerm.scorePenalty))),
+        )
+        .reduce(math.min);
+    final double scoreWithoutEmptySpaces = _scoreTerm(
+      searchTerm.replaceAll(' ', ''),
+      TextSearchItemTerm(term.replaceAll(' ', ''), itemTerm.scorePenalty),
+    );
+    // print(math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty);
 
-    return 1;
+    return math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty;
   }
-
-// double _scoreTerm(String searchTerm, TextSearchItemTerm itemTerm) {
-//   if (itemTerm.term.length == 1) {
-//     return searchTerm.startsWith(itemTerm.term) ? 0 + itemTerm.scorePenalty : 4;
-//   }
-//   searchTerm = searchTerm.toLowerCase();
-//   final String term = itemTerm.term.toLowerCase();
-//   if (searchTerm == term) {
-//     print(0 + itemTerm.scorePenalty);
-//     return 0 + itemTerm.scorePenalty;
-//   }
-//   // Direct comparison (regardless of word or sentence).
-//   final double initialScore =
-//       _editDistance.distance(searchTerm.toLowerCase(), term.toLowerCase()) * searchTerm.length;
-//   if (!term.contains(' ')) {
-//     return initialScore + itemTerm.scorePenalty;
-//   }
-//   if (term.startsWith(searchTerm)) {
-//     return math.max(0.05, 0.5 - searchTerm.length / term.length) + itemTerm.scorePenalty;
-//   }
-//   if (term.contains(searchTerm)) {
-//     print(math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty);
-//     return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
-//   }
-//   // Compare to sentences by splitting to each component word.
-//   final List<String> words = term.split(' ');
-//   final Iterable<String> consideredWords = words.where((String word) => word.length > 1);
-//   if (consideredWords.isEmpty) {
-//     return itemTerm.scorePenalty;
-//   }
-//   final double perWordScore = consideredWords
-//       .map(
-//         (String word) =>
-//             // Penalize longer sentences and avoid multiply by 0 (exact match).
-//             math.sqrt(words.length + 1) *
-//             (0.1 + _scoreTerm(searchTerm, TextSearchItemTerm(word, itemTerm.scorePenalty))),
-//       )
-//       .reduce(math.min);
-//   final double scoreWithoutEmptySpaces = _scoreTerm(
-//     searchTerm.replaceAll(' ', ''),
-//     TextSearchItemTerm(term.replaceAll(' ', ''), itemTerm.scorePenalty),
-//   );
-//   // print(math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty);
-//   return math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty;
-// }
 }
 
-// class JaroWinkler {
-//   final double _scalingFactor;
-//
-//   JaroWinkler([this._scalingFactor = 0.1]);
-//
-//   double similarity(String s1, String s2) {
-//     if (s1.isEmpty || s2.isEmpty) {
-//       return 0;
-//     }
-//     if (s1 == s2) {
-//       return 1;
-//     }
-//
-//     final int matchDistance = (s1.length / 2).ceil() - 1;
-//     final List<bool> s1Matches = List<bool>.filled(s1.length, false);
-//     final List<bool> s2Matches = List<bool>.filled(s2.length, false);
-//
-//     int matches = 0;
-//     int transpositions = 0;
-//
-//     for (int i = 0; i < s1.length; i++) {
-//       final int start = math.max(0, i - matchDistance);
-//       final int end = math.min(s2.length - 1, i + matchDistance);
-//
-//       for (int j = start; j <= end; j++) {
-//         if (s2Matches[j]) continue;
-//
-//         if (s1[i] != s2[j]) continue;
-//
-//         s1Matches[i] = true;
-//         s2Matches[j] = true;
-//
-//         matches++;
-//         break;
-//       }
-//     }
-//
-//     if (matches == 0) return 0;
-//
-//     int k = 0;
-//     for (int i = 0; i < s1.length; i++) {
-//       if (!s1Matches[i]) continue;
-//
-//       while (!s2Matches[k]) {
-//         k++;
-//       }
-//
-//       if (s1[i] != s2[k]) transpositions++;
-//
-//       k++;
-//     }
-//
-//     final double jaro =
-//         ((matches / s1.length) + (matches / s2.length) + ((matches - transpositions / 2) / matches)) / 3.0;
-//
-//     int prefix = 0;
-//     for (int i = 0; i < math.min(math.min(4, s1.length), s2.length); i++) {
-//       if (s1[i] == s2[i]) {
-//         prefix++;
-//       } else {
-//         break;
-//       }
-//     }
-//
-//     return jaro + (prefix * _scalingFactor * (1 - jaro));
-//   }
-//
-//   double distance(String s1, String s2) {
-//     return 1 - similarity(s1, s2);
-//   }
-// }
+class JaroWinkler {
+  JaroWinkler([this._scalingFactor = 0.1]);
+
+  final double _scalingFactor;
+
+  double distance(String s1, String s2) {
+    return 1 - similarity(s1, s2);
+  }
+
+  double similarity(String s1, String s2) {
+    if (s1.isEmpty || s2.isEmpty) {
+      return 0;
+    }
+    if (s1 == s2) {
+      return 1;
+    }
+
+    final int matchDistance = (s1.length / 2).ceil() - 1;
+    final List<bool> s1Matches = List<bool>.filled(s1.length, false);
+    final List<bool> s2Matches = List<bool>.filled(s2.length, false);
+
+    int matches = 0;
+    int transpositions = 0;
+
+    for (int i = 0; i < s1.length; i++) {
+      final int start = math.max(0, i - matchDistance);
+      final int end = math.min(s2.length - 1, i + matchDistance);
+
+      for (int j = start; j <= end; j++) {
+        if (s2Matches[j]) continue;
+
+        if (s1[i] != s2[j]) continue;
+
+        s1Matches[i] = true;
+        s2Matches[j] = true;
+
+        matches++;
+        break;
+      }
+    }
+
+    if (matches == 0) return 0;
+
+    int k = 0;
+    for (int i = 0; i < s1.length; i++) {
+      if (!s1Matches[i]) continue;
+
+      while (!s2Matches[k]) {
+        k++;
+      }
+
+      if (s1[i] != s2[k]) transpositions++;
+
+      k++;
+    }
+
+    final double jaro =
+        ((matches / s1.length) + (matches / s2.length) + ((matches - transpositions / 2) / matches)) / 3.0;
+
+    int prefix = 0;
+    for (int i = 0; i < math.min(math.min(4, s1.length), s2.length); i++) {
+      if (s1[i] == s2[i]) {
+        prefix++;
+      } else {
+        break;
+      }
+    }
+
+    return jaro + (prefix * _scalingFactor * (1 - jaro));
+  }
+}
