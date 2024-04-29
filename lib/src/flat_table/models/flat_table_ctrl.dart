@@ -67,15 +67,20 @@ class FlatTableCtrl with ChangeNotifier {
       if (textFilter.value != '') {
         final List<TextSearchItem<List<dynamic>>> searchableItems = _cachedRows!.map(
           (List<dynamic> e) {
-            final Iterable<String> terms = e.map((dynamic e) => e.toString().split(' ')).expand((List<String> i) => i);
+            final Iterable<String> terms = e
+                .map(
+                  (dynamic i) => i.toString().split(' ')..add('all:$i'),
+                )
+                .expand((List<String> j) => j);
 
             return TextSearchItem<List<dynamic>>.fromTerms(e, terms);
           },
         ).toList();
         final List<List<dynamic>> result = TextSearch<List<dynamic>>(searchableItems).fastSearch(
           textFilter.value,
-          matchThreshold: 1.5,
+          matchThreshold: 0.8,
         );
+
         if (result.isNotEmpty) _cachedRows = result;
       }
 

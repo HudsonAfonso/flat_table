@@ -16,6 +16,7 @@ dependencies:
 
   intl: any
   gap: any
+  collection: any
 
   excel: 4.0.3
   file_saver: 0.2.12

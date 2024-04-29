@@ -24,6 +24,9 @@ class TextSearchItem<T> {
 
   final T object;
   final Iterable<TextSearchItemTerm> terms;
+
+  @override
+  String toString() => 'TextSearchItem($object, $terms)';
 }
 
 /// A search result containing the matching `object` along with the `score`.
@@ -50,17 +53,47 @@ class TextSearch<T> {
   /// Returns search results ordered by decreasing score.
   /// ~3-5x faster than `search`, but does not include the search score.
   List<T> fastSearch(String term, {double matchThreshold = 1.5}) {
+    final List<String> terms = term.split(',').map((String e) => e.trim()).toList();
+    final List<List<T>> sete = terms.map((String e) => _fs(e, matchThreshold)).toList();
+
+    return sete
+        .fold<Set<T>>(
+          sete.first.toSet(),
+          (Set<T> previousValue, List<T> element) => previousValue.intersection(element.toSet()),
+        )
+        .toList();
+  }
+
+  /// Returns search results along with score ordered by decreasing score.
+  /// For libraries with 10k+ items, `fastSearch` will start being noticeably
+  /// faster.
+  List<TextSearchResult<T>> search(String term, {double matchThreshold = 1.5}) {
+    return items
+        .map(
+          (TextSearchItem<T> item) => (
+            item,
+            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm_(term, itemTerm)).reduce(math.min),
+          ),
+        )
+        .where(((TextSearchItem<T>, double) t) => t.$2 < matchThreshold)
+        .map(((TextSearchItem<T>, double) t) => TextSearchResult<T>(t.$1.object, t.$2))
+        .toList()
+      ..sort((TextSearchResult<dynamic> a, TextSearchResult<dynamic> b) => a.score.compareTo(b.score));
+  }
+
+  List<T> _fs(String t, double matchThreshold) {
     final List<(TextSearchItem<T>, double)> sorted = items
         .map(
           (TextSearchItem<T> item) => (
             item,
-            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm(term, itemTerm)).reduce(math.min),
+            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm(t, itemTerm)).reduce(math.min),
           ),
         )
         .toList()
       ..sort(
         ((TextSearchItem<T>, double) a, (TextSearchItem<T>, double) b) => a.$2.compareTo(b.$2),
       );
+
     final List<T> result = <T>[];
     for (final dynamic candidate in sorted) {
       if (candidate.$2 >= matchThreshold) {
@@ -72,30 +105,45 @@ class TextSearch<T> {
     return result;
   }
 
-  /// Returns search results along with score ordered by decreasing score.
-  /// For libraries with 10k+ items, `fastSearch` will start being noticeably
-  /// faster.
-  List<TextSearchResult<T>> search(String term, {double matchThreshold = 1.5}) {
-    return items
-        .map(
-          (TextSearchItem<T> item) => (
-            item,
-            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm(term, itemTerm)).reduce(math.min),
-          ),
-        )
-        .where(((TextSearchItem<T>, double) t) => t.$2 < matchThreshold)
-        .map(((TextSearchItem<T>, double) t) => TextSearchResult<T>(t.$1.object, t.$2))
-        .toList()
-      ..sort((TextSearchResult<dynamic> a, TextSearchResult<dynamic> b) => a.score.compareTo(b.score));
-  }
-
   double _scoreTerm(String searchTerm, TextSearchItemTerm itemTerm) {
-    if (itemTerm.term.length == 1) {
-      return searchTerm.startsWith(itemTerm.term) ? itemTerm.scorePenalty + 0 : 4;
-    }
     searchTerm = searchTerm.toLowerCase();
     final String term = itemTerm.term.toLowerCase();
+
+    // print(searchTerm);
+    // print(term);
+
+    if (term == 'all:$searchTerm') {
+      return 0;
+    }
+
+    if (term.contains(searchTerm)) {
+      return itemTerm.scorePenalty + 0.001;
+      // return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
+    }
+
+    return 1;
+  }
+
+  double _scoreTerm_(String searchTerm, TextSearchItemTerm itemTerm) {
+    searchTerm = searchTerm.toLowerCase();
+
+    // if (itemTerm.term.length == 1) {
+    //   return searchTerm.startsWith(itemTerm.term) ? itemTerm.scorePenalty + 0 : 4;
+    // }
+
+    final String term = itemTerm.term.toLowerCase();
+
+    // if (term == 'shell') {
+    //   print('shell');
+    // }
+
+    if (term == 'all:$searchTerm') {
+      return 0;
+    }
+
     if (searchTerm == term) {
+      // print(searchTerm);
+      // print(term);
       // print(0 + itemTerm.scorePenalty);
       return itemTerm.scorePenalty + 0;
     }
@@ -103,12 +151,15 @@ class TextSearch<T> {
     final double initialScore =
         _editDistance.distance(searchTerm.toLowerCase(), term.toLowerCase()) * searchTerm.length;
     if (!term.contains(' ')) {
+      // print('initialScore = ${initialScore + itemTerm.scorePenalty}');
       return initialScore + itemTerm.scorePenalty;
     }
     if (term.startsWith(searchTerm)) {
+      // print('term.startsWith(searchTerm)');
       return math.max(0.05, 0.5 - searchTerm.length / term.length) + itemTerm.scorePenalty;
     }
     if (term.contains(searchTerm)) {
+      // print('term.contains(searchTerm)');
       // print(math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty);
       return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
     }
@@ -116,6 +167,7 @@ class TextSearch<T> {
     final List<String> words = term.split(' ');
     final Iterable<String> consideredWords = words.where((String word) => word.length > 1);
     if (consideredWords.isEmpty) {
+      // print('consideredWords.isEmpty');
       return itemTerm.scorePenalty;
     }
     final double perWordScore = consideredWords
@@ -131,6 +183,8 @@ class TextSearch<T> {
       TextSearchItemTerm(term.replaceAll(' ', ''), itemTerm.scorePenalty),
     );
     // print(math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty);
+
+    // print('math');
 
     return math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty;
   }
