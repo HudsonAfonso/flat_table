@@ -20,6 +20,7 @@ dependencies:
 
   excel: 4.0.3
   file_saver: 0.2.12
+  responsive_grid_list: any
 
 dev_dependencies:
   ## lint

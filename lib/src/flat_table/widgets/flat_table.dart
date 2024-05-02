@@ -80,7 +80,7 @@ class FlatTable extends StatelessWidget {
                           );
                         },
                         rowBuilder: (int index) {
-                          Color? color = colorScheme.onSurfaceVariant.withOpacity(0.1);
+                          Color? color = colorScheme.secondary.withOpacity(0.1);
                           color = index.isOdd ? color : null;
 
                           final Brightness brightness = Theme.of(context).brightness;
@@ -88,6 +88,10 @@ class FlatTable extends StatelessWidget {
                             color = brightness == Brightness.light
                                 ? colorScheme.secondary
                                 : colorScheme.secondary.darken(40);
+                          }
+
+                          if (index == 0) {
+                            color = colorScheme.secondary.withOpacity(0.2);
                           }
 
                           return TableSpan(
@@ -99,7 +103,10 @@ class FlatTable extends StatelessWidget {
                               ),
                             },
                             backgroundDecoration: index == 0 && ctrl.provider.meta.length != 1
-                                ? decoration
+                                ? TableSpanDecoration(
+                                    border: TableSpanBorder(trailing: BorderSide(color: theme.dividerColor)),
+                                    color: color,
+                                  ) //decoration
                                 : TableSpanDecoration(color: color),
                           );
                         },
@@ -271,6 +278,15 @@ class _TextCellState extends State<TextCell> with AutomaticKeepAliveClientMixin<
       return TableViewCell(child: Checkbox(value: false, onChanged: (bool? value) {})); // ignore: no-empty-block
     }
 
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    Color textColor = colorScheme.onSurface;
+    if (widget.ctrl.selected.contains(yIndex)) {
+      textColor = colorScheme.secondary.withOpacity(0.2).onColor == Colors.black // --
+          ? colorScheme.onSurface
+          : colorScheme.surface;
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -280,7 +296,7 @@ class _TextCellState extends State<TextCell> with AutomaticKeepAliveClientMixin<
               label.toString(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: textColor,
                 letterSpacing: type.currency ?? false ? 0.1 : null,
                 fontFeatures: <FontFeature>[const FontFeature.proportionalFigures()],
               ),

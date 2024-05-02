@@ -1,19 +1,71 @@
 import 'package:flat_table/flat_table.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-void main() => runApp(const MyApp());
+import 'flex_ext.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AppWidget());
+
+class AppWidget extends StatelessWidget {
+  const AppWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // const Color colorSchemeSeed = Color(0xFF333333);
+    const Color colorSchemeSeed = Colors.blueGrey;
+
     return MaterialApp(
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-      title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MyHomePage(title: 'Demo'),
+      title: 'Demo',
+      theme: _themeFor(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.light, colorSchemeSeed: colorSchemeSeed),
+      ),
+      darkTheme: _themeFor(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, colorSchemeSeed: colorSchemeSeed),
+      ),
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
+    );
+  }
+
+  ThemeData _themeFor({required ThemeData theme}) {
+    final TextTheme textTheme = GoogleFonts.ibmPlexSansCondensedTextTheme(theme.textTheme);
+    final TextStyle labelMedium = textTheme.labelMedium!.copyWith(color: theme.colorScheme.onSurface);
+
+    final IconThemeData iconTheme = theme.iconTheme.copyWith(weight: 300);
+
+    return theme.copyWith(
+      textTheme: textTheme,
+      appBarTheme: theme.appBarTheme.copyWith(
+        centerTitle: false,
+        scrolledUnderElevation: 0,
+        iconTheme: iconTheme,
+        actionsIconTheme: iconTheme,
+      ),
+      snackBarTheme: theme.snackBarTheme.copyWith(behavior: SnackBarBehavior.floating),
+      iconTheme: iconTheme,
+      navigationRailTheme: theme.navigationRailTheme.copyWith(
+        selectedIconTheme: iconTheme,
+        unselectedIconTheme: iconTheme,
+        selectedLabelTextStyle: labelMedium,
+        unselectedLabelTextStyle: labelMedium,
+      ),
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+        border: const OutlineInputBorder(),
+        filled: true,
+        isDense: true,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        // alignLabelWithHint: true,
+      ),
+      bannerTheme: theme.bannerTheme.copyWith(
+        backgroundColor: theme.colorScheme.surface.getShadeColor(lightenn: theme.brightness == Brightness.dark),
+        padding: const EdgeInsets.all(16),
+      ),
+      cardTheme: theme.cardTheme.copyWith(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+      ),
     );
   }
 }

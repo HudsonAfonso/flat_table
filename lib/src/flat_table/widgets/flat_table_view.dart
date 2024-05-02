@@ -7,6 +7,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../extensions/flex_ext.dart';
 import '../models/flat_table_ctrl.dart';
 import '../models/option.dart';
+import 'card_view.dart';
 import 'column_filter.dart';
 import 'constants.dart';
 import 'flat_table.dart';
@@ -228,12 +229,18 @@ class FlatTableView extends StatelessWidget {
                         : const SizedBox.shrink();
                   },
                 ),
+                const Gap(4),
                 Expanded(
                   child: LayoutBuilder(
                     builder: (_, BoxConstraints constraints) {
                       scheduleMicrotask(() {
                         tableSize.value = constraints.biggest;
                       });
+
+                      const bool cardView = false;
+                      if (cardView) {
+                        return CardView(ctrl, builders: {});
+                      }
 
                       return FlatTable(ctrl, builders: builders);
                     },
