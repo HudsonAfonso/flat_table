@@ -80,7 +80,7 @@ class FlatTable extends StatelessWidget {
                           );
                         },
                         rowBuilder: (int index) {
-                          Color? color = colorScheme.secondary.withOpacity(0.1);
+                          Color? color = colorScheme.primary.withOpacity(0.1);
                           color = index.isOdd ? color : null;
 
                           final Brightness brightness = Theme.of(context).brightness;
@@ -91,7 +91,7 @@ class FlatTable extends StatelessWidget {
                           }
 
                           if (index == 0) {
-                            color = colorScheme.secondary.withOpacity(0.2);
+                            color = colorScheme.primary.withOpacity(0.2);
                           }
 
                           return TableSpan(
