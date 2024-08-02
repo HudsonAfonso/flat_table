@@ -54,7 +54,7 @@ class ColumnFilter extends StatelessWidget {
                   child: Text(
                     'Propriedades',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -68,7 +68,7 @@ class ColumnFilter extends StatelessWidget {
                 );
               }),
             ],
-            style: MenuStyle(maximumSize: MaterialStateProperty.all(Size(size.width, size.height))),
+            style: MenuStyle(maximumSize: WidgetStateProperty.all(Size(size.width, size.height))),
             alignmentOffset: const Offset(0, 3),
             builder: (BuildContext context, MenuController controller, Widget? child) {
               final TextEditingController controller = TextEditingController();

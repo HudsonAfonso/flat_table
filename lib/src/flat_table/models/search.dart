@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
+
 /// Represents a candidate `term` for a search result.
 class TextSearchItemTerm {
   const TextSearchItemTerm(this.term, [this.scorePenalty = 0.0]);
@@ -72,13 +74,13 @@ class TextSearch<T> {
         .map(
           (TextSearchItem<T> item) => (
             item,
-            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm_(term, itemTerm)).reduce(math.min),
+            item.terms.map((TextSearchItemTerm itemTerm) => _scoreTerm(term, itemTerm)).reduce(math.min),
           ),
         )
         .where(((TextSearchItem<T>, double) t) => t.$2 < matchThreshold)
         .map(((TextSearchItem<T>, double) t) => TextSearchResult<T>(t.$1.object, t.$2))
         .toList()
-      ..sort((TextSearchResult<dynamic> a, TextSearchResult<dynamic> b) => a.score.compareTo(b.score));
+        .sorted((TextSearchResult<dynamic> a, TextSearchResult<dynamic> b) => a.score.compareTo(b.score));
   }
 
   List<T> _fs(String t, double matchThreshold) {
@@ -90,9 +92,9 @@ class TextSearch<T> {
           ),
         )
         .toList()
-      ..sort(
-        ((TextSearchItem<T>, double) a, (TextSearchItem<T>, double) b) => a.$2.compareTo(b.$2),
-      );
+        .sorted(
+          ((TextSearchItem<T>, double) a, (TextSearchItem<T>, double) b) => a.$2.compareTo(b.$2),
+        );
 
     final List<T> result = <T>[];
     for (final dynamic candidate in sorted) {
@@ -117,77 +119,78 @@ class TextSearch<T> {
     }
 
     if (term.contains(searchTerm)) {
-      return itemTerm.scorePenalty + 0.001;
+      return 0;
+      // return itemTerm.scorePenalty + 0.1;
       // return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
     }
 
     return 1;
   }
 
-  double _scoreTerm_(String searchTerm, TextSearchItemTerm itemTerm) {
-    searchTerm = searchTerm.toLowerCase();
-
-    // if (itemTerm.term.length == 1) {
-    //   return searchTerm.startsWith(itemTerm.term) ? itemTerm.scorePenalty + 0 : 4;
-    // }
-
-    final String term = itemTerm.term.toLowerCase();
-
-    // if (term == 'shell') {
-    //   print('shell');
-    // }
-
-    if (term == 'all:$searchTerm') {
-      return 0;
-    }
-
-    if (searchTerm == term) {
-      // print(searchTerm);
-      // print(term);
-      // print(0 + itemTerm.scorePenalty);
-      return itemTerm.scorePenalty + 0;
-    }
-    // Direct comparison (regardless of word or sentence).
-    final double initialScore =
-        _editDistance.distance(searchTerm.toLowerCase(), term.toLowerCase()) * searchTerm.length;
-    if (!term.contains(' ')) {
-      // print('initialScore = ${initialScore + itemTerm.scorePenalty}');
-      return initialScore + itemTerm.scorePenalty;
-    }
-    if (term.startsWith(searchTerm)) {
-      // print('term.startsWith(searchTerm)');
-      return math.max(0.05, 0.5 - searchTerm.length / term.length) + itemTerm.scorePenalty;
-    }
-    if (term.contains(searchTerm)) {
-      // print('term.contains(searchTerm)');
-      // print(math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty);
-      return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
-    }
-    // Compare to sentences by splitting to each component word.
-    final List<String> words = term.split(' ');
-    final Iterable<String> consideredWords = words.where((String word) => word.length > 1);
-    if (consideredWords.isEmpty) {
-      // print('consideredWords.isEmpty');
-      return itemTerm.scorePenalty;
-    }
-    final double perWordScore = consideredWords
-        .map(
-          (String word) =>
-              // Penalize longer sentences and avoid multiply by 0 (exact match).
-              math.sqrt(words.length + 1) *
-              (0.1 + _scoreTerm(searchTerm, TextSearchItemTerm(word, itemTerm.scorePenalty))),
-        )
-        .reduce(math.min);
-    final double scoreWithoutEmptySpaces = _scoreTerm(
-      searchTerm.replaceAll(' ', ''),
-      TextSearchItemTerm(term.replaceAll(' ', ''), itemTerm.scorePenalty),
-    );
-    // print(math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty);
-
-    // print('math');
-
-    return math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty;
-  }
+  // double _scoreTerm_(String searchTerm, TextSearchItemTerm itemTerm) {
+  //   searchTerm = searchTerm.toLowerCase();
+  //
+  //   // if (itemTerm.term.length == 1) {
+  //   //   return searchTerm.startsWith(itemTerm.term) ? itemTerm.scorePenalty + 0 : 4;
+  //   // }
+  //
+  //   final String term = itemTerm.term.toLowerCase();
+  //
+  //   // if (term == 'shell') {
+  //   //   print('shell');
+  //   // }
+  //
+  //   if (term == 'all:$searchTerm') {
+  //     return 0;
+  //   }
+  //
+  //   if (searchTerm == term) {
+  //     // print(searchTerm);
+  //     // print(term);
+  //     // print(0 + itemTerm.scorePenalty);
+  //     return itemTerm.scorePenalty + 0;
+  //   }
+  //   // Direct comparison (regardless of word or sentence).
+  //   final double initialScore =
+  //       _editDistance.distance(searchTerm.toLowerCase(), term.toLowerCase()) * searchTerm.length;
+  //   if (!term.contains(' ')) {
+  //     // print('initialScore = ${initialScore + itemTerm.scorePenalty}');
+  //     return initialScore + itemTerm.scorePenalty;
+  //   }
+  //   if (term.startsWith(searchTerm)) {
+  //     // print('term.startsWith(searchTerm)');
+  //     return math.max(0.05, 0.5 - searchTerm.length / term.length) + itemTerm.scorePenalty;
+  //   }
+  //   if (term.contains(searchTerm)) {
+  //     // print('term.contains(searchTerm)');
+  //     // print(math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty);
+  //     return math.max(0.05, 0.7 - searchTerm.length / term.length) + itemTerm.scorePenalty;
+  //   }
+  //   // Compare to sentences by splitting to each component word.
+  //   final List<String> words = term.split(' ');
+  //   final Iterable<String> consideredWords = words.where((String word) => word.length > 1);
+  //   if (consideredWords.isEmpty) {
+  //     // print('consideredWords.isEmpty');
+  //     return itemTerm.scorePenalty;
+  //   }
+  //   final double perWordScore = consideredWords
+  //       .map(
+  //         (String word) =>
+  //             // Penalize longer sentences and avoid multiply by 0 (exact match).
+  //             math.sqrt(words.length + 1) *
+  //             (0.1 + _scoreTerm(searchTerm, TextSearchItemTerm(word, itemTerm.scorePenalty))),
+  //       )
+  //       .reduce(math.min);
+  //   final double scoreWithoutEmptySpaces = _scoreTerm(
+  //     searchTerm.replaceAll(' ', ''),
+  //     TextSearchItemTerm(term.replaceAll(' ', ''), itemTerm.scorePenalty),
+  //   );
+  //   // print(math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty);
+  //
+  //   // print('math');
+  //
+  //   return math.min(scoreWithoutEmptySpaces, math.min(initialScore, perWordScore)) + itemTerm.scorePenalty;
+  // }
 }
 
 class JaroWinkler {

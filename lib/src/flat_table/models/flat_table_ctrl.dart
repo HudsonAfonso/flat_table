@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
@@ -78,10 +79,11 @@ class FlatTableCtrl with ChangeNotifier {
         ).toList();
         final List<List<dynamic>> result = TextSearch<List<dynamic>>(searchableItems).fastSearch(
           textFilter.value,
-          matchThreshold: 0.8,
+          matchThreshold: 0.1,
         );
 
-        if (result.isNotEmpty) _cachedRows = result;
+        // if (result.isNotEmpty)
+        _cachedRows = result;
       }
 
       final RegExp regExp = RegExp('[^a-zA-Z0-9 ]');
@@ -265,7 +267,9 @@ class FlatTableCtrl with ChangeNotifier {
   void sortBy(int columnIndex) {
     sortDirection = sortColumnIndex == columnIndex ? sortDirection.reverse() : SortDirection.ascending;
 
-    _cachedRows!.sort((List<dynamic> a, List<dynamic> b) => _compareData(a[columnIndex], b[columnIndex]));
+    _cachedRows = _cachedRows!.sorted(
+      (List<dynamic> a, List<dynamic> b) => _compareData(a[columnIndex], b[columnIndex]),
+    );
     sortColumnIndex = columnIndex;
     selected.clear();
 

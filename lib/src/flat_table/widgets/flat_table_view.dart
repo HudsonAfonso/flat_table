@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../extensions/flex_ext.dart';
 import '../models/flat_table_ctrl.dart';
+import '../models/list_provider.dart';
 import '../models/option.dart';
 import 'card_view.dart';
 import 'column_filter.dart';
@@ -16,6 +17,7 @@ import 'menu_anchor.dart';
 import 'options.dart';
 
 typedef Action = void Function();
+typedef CardBuilder = Widget Function(BuildContext context, int index, List<SimpleType> columns, List<dynamic> row);
 
 class FlatTableView extends StatelessWidget {
   const FlatTableView({
@@ -25,8 +27,10 @@ class FlatTableView extends StatelessWidget {
     this.actions = const <Widget>[],
     this.filters = const <Widget>[],
     this.showConfig = false,
+    this.cardView = false,
     this.showHeader = true,
     this.builders = const <String, CustomCellBuilder>{},
+    this.cardBuilder,
   });
 
   final List<Widget> actions;
@@ -35,7 +39,9 @@ class FlatTableView extends StatelessWidget {
   final List<Widget> filters;
   final Action? novoAction;
   final bool showConfig;
+  final bool cardView;
   final bool showHeader;
+  final CardBuilder? cardBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +55,9 @@ class FlatTableView extends StatelessWidget {
       data: theme.copyWith(
         visualDensity: VisualDensity.compact,
         dividerTheme: theme.dividerTheme.copyWith(space: 1, thickness: 1),
-        menuTheme: MenuThemeData(style: MenuStyle(padding: MaterialStateProperty.all(EdgeInsets.zero))),
+        menuTheme: MenuThemeData(style: MenuStyle(padding: WidgetStateProperty.all(EdgeInsets.zero))),
         menuButtonTheme: MenuButtonThemeData(
-          style: ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.only(left: 10, right: 16))),
+          style: ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.only(left: 10, right: 16))),
         ),
       ),
       child: LayoutBuilder(
@@ -237,9 +243,9 @@ class FlatTableView extends StatelessWidget {
                         tableSize.value = constraints.biggest;
                       });
 
-                      const bool cardView = false;
+                      // const bool cardView = true;
                       if (cardView) {
-                        return CardView(ctrl, builders: {});
+                        return CardView(ctrl, cardBuilder: cardBuilder);
                       }
 
                       return FlatTable(ctrl, builders: builders);
@@ -306,7 +312,7 @@ class FilterList<T> extends StatelessWidget {
             ),
           )
           .toList(),
-      style: MenuStyle(padding: MaterialStateProperty.all(EdgeInsets.zero)),
+      style: MenuStyle(padding: WidgetStateProperty.all(EdgeInsets.zero)),
       alignmentOffset: const Offset(0, 6),
       builder: (BuildContext context, MenuController controller, _) {
         return GestureDetector(

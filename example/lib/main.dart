@@ -24,7 +24,7 @@ class AppWidget extends StatelessWidget {
       darkTheme: _themeFor(
         theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, colorSchemeSeed: colorSchemeSeed),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
     );
   }

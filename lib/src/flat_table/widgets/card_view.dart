@@ -1,5 +1,5 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:responsive_grid_list/responsive_grid_list.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
@@ -15,15 +15,25 @@ class CardView extends StatelessWidget {
     this.ctrl, {
     super.key,
     this.builders = const <String, CustomCellBuilder0>{},
+    this.cardBuilder,
   });
 
   final Map<String, CustomCellBuilder0> builders;
   final FlatTableCtrl ctrl;
+  final CardBuilder? cardBuilder;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+
+    final TextStyle? labelStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w900,
+      height: 1.3,
+    );
+    final TextStyle? dataStyle = theme.textTheme.bodySmall?.copyWith(
+      height: 1,
+    );
 
     final ScrollController verticalController = ScrollController();
 
@@ -55,65 +65,84 @@ class CardView extends StatelessWidget {
                   radius: const Radius.circular(2),
                   thickness: 10,
                   trackVisibility: true,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 11, bottom: 11),
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: ResponsiveGridList(
-                          minItemWidth: 290,
-                          horizontalGridMargin: 0,
-                          // verticalGridMargin: 16,
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: ResponsiveGridList(
+                        minItemWidth: 300,
+                        horizontalGridMargin: 0,
+                        // verticalGridMargin: 16,
 
-                          listViewBuilderOptions: ListViewBuilderOptions(
-                            controller: verticalController,
-                            shrinkWrap: true,
-                          ),
-                          children: ctrl.rows
-                              .sublist(1)
-                              .map(
-                                (List<dynamic> row) => Card(
-                                  color: colorScheme.surfaceVariant.lighten(5),
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(color: colorScheme.surfaceVariant),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: ctrl.columns
-                                          .map<Widget>(
-                                            (SimpleType t) {
-                                              return Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: <Widget>[
-                                                  Text(
-                                                    t.columnLabel,
-                                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                                      fontWeight: FontWeight.w900,
-                                                      height: 1.3,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    row.elementAtOrNull(t.index).toString(),
-                                                    style: theme.textTheme.bodySmall?.copyWith(
-                                                      height: 1,
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          )
-                                          .intersperse(const Gap(smallSpacing))
-                                          .toList(),
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                        listViewBuilderOptions: ListViewBuilderOptions(
+                          controller: verticalController,
+                          shrinkWrap: true,
                         ),
+                        children: ctrl.rows.sublist(1).asMap().entries.map(
+                          (MapEntry<int, List<dynamic>> entry) {
+                            final List<dynamic> row = entry.value;
+
+                            if (cardBuilder != null) return cardBuilder!.call(context, entry.key, ctrl.columns, row);
+
+                            return Card(
+                              color: theme.brightness == Brightness.dark
+                                  ? colorScheme.surfaceContainerHighest.lighten(5)
+                                  : colorScheme.surfaceContainerHighest.darken(5),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: ctrl.columns
+                                      .slices(2)
+                                      .map<Widget>(
+                                        (List<SimpleType> l) {
+                                          return Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: <Widget>[
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: <Widget>[
+                                                    Text(l.first.columnLabel, style: labelStyle),
+                                                    Text(
+                                                      row.elementAtOrNull(l.first.index).toString(),
+                                                      style: dataStyle,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              if (l.length > 1)
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                    children: <Widget>[
+                                                      Text(l.last.columnLabel, style: labelStyle),
+                                                      Text(
+                                                        row.elementAtOrNull(l.last.index).toString(),
+                                                        style: dataStyle,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                            ],
+                                          );
+                                        },
+                                      )
+                                      .intersperse(
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: smallSpacing * 0.7),
+                                          child: Divider(height: 1),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                            );
+                          },
+                        ).toList(),
                       ),
                     ),
                   ),
