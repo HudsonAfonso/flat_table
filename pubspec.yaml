@@ -12,13 +12,13 @@ dependencies:
   flutter:
     sdk: flutter
   material_symbols_icons: any
-  two_dimensional_scrollables: 0.3.1
+  two_dimensional_scrollables: 0.3.2
 
   intl: any
   gap: any
   collection: any
 
-  excel: 4.0.3
+  excel: 4.0.6
   file_saver: any
   responsive_grid_list: any
   decimal: any

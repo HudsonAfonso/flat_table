@@ -94,6 +94,10 @@ class FlatTable extends StatelessWidget {
                             color = colorScheme.primary.withOpacity(0.2);
                           }
 
+                          if (index == 0 && ctrl.provider.meta.length == 1 && ctrl.provider.data.isEmpty) {
+                            color = Colors.transparent;
+                          }
+
                           return TableSpan(
                             extent: FixedTableSpanExtent(index == 0 ? 40 : 35),
                             recognizerFactories: <Type, GestureRecognizerFactory>{
@@ -267,6 +271,10 @@ class _TextCellState extends State<TextCell> with AutomaticKeepAliveClientMixin<
 
     final List<dynamic> row = widget.ctrl.getRow(yIndex - 0);
     dynamic label = row.length <= widget.vicinity.xIndex ? '' : row[widget.vicinity.xIndex] ?? '';
+    if (widget.ctrl.formatters?.containsKey(widget.ctrl.provider.meta[type.index].name) ?? false) {
+      label =
+          widget.ctrl.formatters![widget.ctrl.provider.meta[type.index].name]!.call(row.elementAtOrNull(type.index));
+    }
 
     if (yIndex != 0 && ((type.currency ?? false) || type.decimalDigits != null)) {
       if (label != null && label != '') {

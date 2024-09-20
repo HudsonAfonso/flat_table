@@ -24,7 +24,7 @@ class AppWidget extends StatelessWidget {
       darkTheme: _themeFor(
         theme: ThemeData(useMaterial3: true, brightness: Brightness.dark, colorSchemeSeed: colorSchemeSeed),
       ),
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
       debugShowCheckedModeBanner: false,
     );
   }
@@ -105,7 +105,13 @@ class _MyHomePageState extends State<MyHomePage> {
               SimpleType(index: 8, builtInType: 'double', columnLabel: 'DPS', name: 'DPS', decimalDigits: 2),
               SimpleType(index: 9, builtInType: 'string', columnLabel: 'Fire Mode', name: 'Fire Mode'),
               SimpleType(index: 10, builtInType: 'int', columnLabel: 'Recoil', name: 'Recoil'),
-              SimpleType(index: 11, builtInType: 'double', columnLabel: 'Recoil/s', name: 'Recoil/s', decimalDigits: 2),
+              SimpleType(
+                index: 11,
+                builtInType: 'double',
+                columnLabel: 'Recoil/s',
+                name: 'Recoil/s',
+                decimalDigits: 2,
+              ),
               SimpleType(index: 12, builtInType: 'int', columnLabel: 'Armor Penetration', name: 'Armor Penetration'),
               SimpleType(index: 13, builtInType: 'string', columnLabel: 'Unique Traits', name: 'Unique Traits'),
               SimpleType(
@@ -749,6 +755,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ],
           ),
+          showDetail: true,
         ),
         actions: <Widget>[
           Tooltip(
@@ -759,14 +766,27 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ],
-        // showConfig: true,
-        // builders: const <String, CustomCellBuilder>{
-        //   'due_at': DateCell.cellBuilder,
-        //   'expiration_date': DateTimeCell.cellBuilder,
-        //   'leitura_at': DateTimeCell.cellBuilder,
-        //   'sms_data_envio': DateTimeCell.cellBuilder,
-        //   'status': StatusCell.cellBuilder,
-        // },
+        detailBuilder: (BuildContext context, List<dynamic>? row) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Object Page Header with Links, Rating Indicator, and Object Status',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(height: 1),
+                ),
+                Text(
+                  row.toString(),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                        height: 2.5,
+                      ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

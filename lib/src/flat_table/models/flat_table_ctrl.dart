@@ -18,19 +18,28 @@ typedef OnSelect = void Function(List<dynamic>);
 class FlatTableCtrl with ChangeNotifier {
   FlatTableCtrl({
     required this.name,
-    required this.provider,
+    ListProvider? provider,
     this.formatters,
     this.refresh,
     this.onSelect,
     this.sizes = const <String, int>{},
     this.multiSelect = false,
+    bool showDetail = false,
+    this.ovs = false,
   }) {
+    this.showDetail.value = showDetail;
+    this.showDetail.addListener(() {
+      if (!this.showDetail.value) {
+        _refresh();
+      }
+    });
+    this.provider = provider ?? ListProvider();
     _refresh();
   }
 
   final bool multiSelect;
   final String name;
-  final ListProvider provider;
+  late ListProvider provider;
 
   Map<String, Formatter>? formatters;
   ValueNotifier<bool> loading = ValueNotifier<bool>(false);
@@ -38,6 +47,7 @@ class FlatTableCtrl with ChangeNotifier {
   RefreshAction? refresh;
   List<int> selected = <int>[];
   ValueNotifier<bool> showFilter = ValueNotifier<bool>(false);
+  ValueNotifier<bool> showDetail = ValueNotifier<bool>(false);
   Map<String, int> sizes;
   int? sortColumnIndex;
   SortDirection sortDirection = SortDirection.ascending;
@@ -47,6 +57,7 @@ class FlatTableCtrl with ChangeNotifier {
   List<int>? _cachedIndices;
   List<List<dynamic>>? _cachedRows;
   bool _disposed = false;
+  final bool ovs;
 
   List<SimpleType> get columns => _cachedColumns ??= provider.meta.where((SimpleType c) => c.visible).toList();
 
@@ -57,10 +68,10 @@ class FlatTableCtrl with ChangeNotifier {
       _cachedRows = provider.data.map(
         (dynamic e) {
           return <dynamic>[
-            for (int i in _indices)
-              (formatters?.containsKey(provider.meta[i].name) ?? false)
-                  ? formatters![provider.meta[i].name]!.call(e[i])
-                  : e[i],
+            for (int i in _indices) e[i],
+            // (formatters?.containsKey(provider.meta[i].name) ?? false)
+            //     ? formatters![provider.meta[i].name]!.call(e[i])
+            //     : e[i],
           ];
         },
       ).toList();
@@ -68,11 +79,10 @@ class FlatTableCtrl with ChangeNotifier {
       if (textFilter.value != '') {
         final List<TextSearchItem<List<dynamic>>> searchableItems = _cachedRows!.map(
           (List<dynamic> e) {
-            final Iterable<String> terms = e
-                .map(
-                  (dynamic i) => i.toString().split(' ')..add('all:$i'),
-                )
-                .expand((List<String> j) => j);
+            final Iterable<String> terms = e.map((dynamic i) {
+              return i.toString().split(' ')..add('all:$i');
+            }).expand((List<String> j) => j);
+            // TODO: usar formatters
 
             return TextSearchItem<List<dynamic>>.fromTerms(e, terms);
           },
@@ -94,6 +104,9 @@ class FlatTableCtrl with ChangeNotifier {
           final List<int> widths = _cachedRows!
               .map((List<dynamic> row) {
                 dynamic value = row.elementAtOrNull(t.index);
+                if (formatters?.containsKey(provider.meta[t.index].name) ?? false) {
+                  value = formatters![provider.meta[t.index].name]!.call(row.elementAtOrNull(t.index));
+                }
 
                 if (sizes.containsKey(t.name)) return sizes[t.name]!;
 
