@@ -34,6 +34,7 @@ class FlatTableView extends StatelessWidget {
     this.builders = const <String, CustomCellBuilder>{},
     this.cardBuilder,
     this.detailBuilder,
+    this.padding,
   });
 
   final List<Widget> actions;
@@ -45,6 +46,7 @@ class FlatTableView extends StatelessWidget {
   final List<Widget> filters;
   final Action? novoAction;
   final bool ovs;
+  final EdgeInsetsGeometry? padding;
   final bool showConfig;
   final bool showHeader;
 
@@ -71,6 +73,7 @@ class FlatTableView extends StatelessWidget {
           return LayoutBuilder(
             builder: (_, BoxConstraints constraints) {
               return ContentView(
+                padding: padding,
                 ovs: ovs,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +91,6 @@ class FlatTableView extends StatelessWidget {
                                     builder: (BuildContext context, Widget? child) {
                                       final int totalSize = ctrl.provider.data.length;
                                       final int filteredSize = ctrl.rows.length - 1;
-
                                       String qty = ' ($filteredSize/$totalSize)';
                                       if (filteredSize == totalSize) {
                                         qty = ' ($filteredSize)';
@@ -174,9 +176,8 @@ class FlatTableView extends StatelessWidget {
                               ? Card(
                                   color: Colors.transparent,
                                   shadowColor: Colors.transparent,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(2)),
-                                  ),
+                                  shape:
+                                      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2))),
                                   margin: EdgeInsets.zero,
                                   clipBehavior: Clip.hardEdge,
                                   child: Column(
@@ -256,7 +257,6 @@ class FlatTableView extends StatelessWidget {
                           scheduleMicrotask(() {
                             tableSize.value = constraints.biggest;
                           });
-
                           if (showDetail) {
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +279,6 @@ class FlatTableView extends StatelessWidget {
                               ],
                             );
                           }
-
                           if (cardView) {
                             return CardView(ctrl, cardBuilder: cardBuilder);
                           }
@@ -406,21 +405,24 @@ class FilterList<T> extends StatelessWidget {
 class ContentView extends StatelessWidget {
   const ContentView({
     required this.child,
+    this.padding,
     this.ovs = false,
     super.key,
   });
 
   final Widget child;
   final bool ovs;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, BoxConstraints constraints) {
         return Padding(
-          padding: constraints.maxWidth <= 640 || ovs
-              ? const EdgeInsets.all(12)
-              : const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          padding: padding ??
+              (constraints.maxWidth <= 640 || ovs
+                  ? const EdgeInsets.all(12)
+                  : const EdgeInsets.symmetric(vertical: 16, horizontal: 24)),
           child: child,
         );
       },
