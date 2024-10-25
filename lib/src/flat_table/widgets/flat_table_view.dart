@@ -30,6 +30,7 @@ class FlatTableView extends StatelessWidget {
     this.showConfig = false,
     this.cardView = false,
     this.showHeader = true,
+    this.compactMode = false,
     this.ovs = false,
     this.builders = const <String, CustomCellBuilder>{},
     this.cardBuilder,
@@ -49,6 +50,7 @@ class FlatTableView extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final bool showConfig;
   final bool showHeader;
+  final bool compactMode;
 
   @override
   Widget build(BuildContext context) {
@@ -74,11 +76,12 @@ class FlatTableView extends StatelessWidget {
             builder: (_, BoxConstraints constraints) {
               return ContentView(
                 padding: padding,
+                compactMode: compactMode,
                 ovs: ovs,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (!showDetail && showHeader)
+                    if (!showDetail && showHeader && !compactMode)
                       Row(
                         children: <Widget>[
                           Expanded(
@@ -167,8 +170,8 @@ class FlatTableView extends StatelessWidget {
                           ),
                         ],
                       ),
-                    if (!showDetail && showHeader) const Gap(8),
-                    if (!showDetail)
+                    if (!showDetail && showHeader && !compactMode) const Gap(8),
+                    if (!showDetail && !compactMode)
                       ValueListenableBuilder<bool>(
                         valueListenable: ctrl.showFilter,
                         builder: (BuildContext context, bool value, Widget? child) {
@@ -250,7 +253,7 @@ class FlatTableView extends StatelessWidget {
                               : const SizedBox.shrink();
                         },
                       ),
-                    if (!showDetail) const Gap(4),
+                    if (!showDetail && !compactMode) const Gap(4),
                     Expanded(
                       child: LayoutBuilder(
                         builder: (_, BoxConstraints constraints) {
@@ -405,6 +408,7 @@ class FilterList<T> extends StatelessWidget {
 class ContentView extends StatelessWidget {
   const ContentView({
     required this.child,
+    required this.compactMode,
     this.padding,
     this.ovs = false,
     super.key,
@@ -413,18 +417,18 @@ class ContentView extends StatelessWidget {
   final Widget child;
   final bool ovs;
   final EdgeInsetsGeometry? padding;
+  final bool compactMode;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, BoxConstraints constraints) {
-        return Padding(
-          padding: padding ??
-              (constraints.maxWidth <= 640 || ovs
-                  ? const EdgeInsets.all(12)
-                  : const EdgeInsets.symmetric(vertical: 16, horizontal: 24)),
-          child: child,
-        );
+        final EdgeInsetsGeometry p = padding ??
+            (constraints.maxWidth <= 640 || ovs
+                ? const EdgeInsets.all(12)
+                : const EdgeInsets.symmetric(vertical: 16, horizontal: 24));
+
+        return Padding(padding: p, child: child);
       },
     );
   }

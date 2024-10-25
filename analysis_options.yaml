@@ -23,8 +23,8 @@ analyzer:
     - /lib/src/flat_table/widgets/menu_anchor.dart
     - /**/*.gen.dart
     - /**/*.g.dart
-  plugins:
-    - dart_code_linter
+#  plugins:
+#    - dart_code_linter
 
 dart_code_linter:
   metrics-exclude:
