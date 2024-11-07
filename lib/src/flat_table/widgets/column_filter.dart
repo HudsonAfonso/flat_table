@@ -96,7 +96,6 @@ class ColumnFilter extends StatelessWidget {
                       );
                     },
                   ),
-                  border: const OutlineInputBorder(),
                 ),
                 style: Theme.of(context).textTheme.bodyMedium,
                 onChanged: (String value) {
