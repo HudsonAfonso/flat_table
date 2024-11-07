@@ -302,7 +302,7 @@ class _TextCellState extends State<TextCell> with AutomaticKeepAliveClientMixin<
           Expanded(
             child: Text(
               label.toString(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 // fontSize: 13,
                 color: textColor,
                 letterSpacing: type.currency ?? false ? 0.1 : null,
