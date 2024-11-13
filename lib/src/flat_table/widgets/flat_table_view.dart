@@ -361,7 +361,10 @@ class FilterList<T> extends StatelessWidget {
             color: inputDecorationTheme.fillColor,
             elevation: 0,
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: inputDecorationTheme.enabledBorder!.borderSide.color),
+              side: BorderSide(
+                color: inputDecorationTheme.enabledBorder?.borderSide.color ??
+                    Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               borderRadius: const BorderRadius.all(Radius.circular(3)),
             ),
             margin: EdgeInsets.zero,
