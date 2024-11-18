@@ -208,7 +208,7 @@ class _HeaderCellState extends State<HeaderCell> with AutomaticKeepAliveClientMi
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontSize: 13,
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   fontFeatures: <FontFeature>[const FontFeature.proportionalFigures()],
                 ),
                 textAlign:
