@@ -73,6 +73,7 @@ class FlatTable extends StatelessWidget {
                         pinnedRowCount: 1,
                         columnCount: ctrl.columns.length,
                         rowCount: ctrl.rows.length,
+                        // cacheExtent: 0,
                         columnBuilder: (int index) {
                           return TableSpan(
                             extent: FixedTableSpanExtent(ctrl.getColumn(index).columnWidth?.toDouble() ?? 200),
@@ -185,7 +186,7 @@ class HeaderCell extends StatefulWidget implements CellBuilder {
 
 class _HeaderCellState extends State<HeaderCell> with AutomaticKeepAliveClientMixin<HeaderCell> {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +255,7 @@ class TextCell extends StatefulWidget implements CellBuilder {
 
 class _TextCellState extends State<TextCell> with AutomaticKeepAliveClientMixin<TextCell> {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   @override
   Widget build(BuildContext context) {

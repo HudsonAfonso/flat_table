@@ -119,7 +119,7 @@ class CardCell extends StatefulWidget {
 
 class _CardCellState extends State<CardCell> with AutomaticKeepAliveClientMixin<CardCell> {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   @override
   Widget build(BuildContext context) {
