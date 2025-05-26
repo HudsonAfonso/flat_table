@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   material_symbols_icons: any
-  two_dimensional_scrollables: 0.3.3
+  two_dimensional_scrollables: 0.3.4
 
   intl: any
   gap: any
@@ -25,7 +25,7 @@ dependencies:
 
 dev_dependencies:
   ## lint
-  dart_code_linter: 1.1.5
+  dart_code_linter: 2.0.0
   flutter_lints: 5.0.0
 
 topics:
