@@ -5,8 +5,8 @@ version: 0.0.1
 #issue_tracker: https://github.com/.../issues
 
 environment:
-  sdk: '>=3.5.4 <4.0.0'
-  flutter: '>=3.24.4'
+  sdk: ">=3.5.4 <4.0.0"
+  flutter: ">=3.24.4"
 
 dependencies:
   flutter:
@@ -18,7 +18,11 @@ dependencies:
   gap: any
   collection: any
 
-  excel: 4.0.6
+  # excel: 4.0.6
+  excel:
+    git:
+      url: https://github.com/frederikstonge/excel.git
+      ref: features/fred/update-packages
   file_saver: any
   responsive_grid_list: any
   decimal: any
@@ -26,7 +30,7 @@ dependencies:
 dev_dependencies:
   ## lint
   dart_code_linter: 2.0.0
-  flutter_lints: 5.0.0
+  flutter_lints: 6.0.0
 
 topics:
   - table
