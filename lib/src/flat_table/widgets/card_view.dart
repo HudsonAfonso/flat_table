@@ -16,11 +16,13 @@ class CardView extends StatelessWidget {
     super.key,
     this.builders = const <String, CustomCellBuilder0>{},
     this.cardBuilder,
+    this.paddingBottom = true,
   });
 
   final Map<String, CustomCellBuilder0> builders;
   final FlatTableCtrl ctrl;
   final CardBuilder? cardBuilder;
+  final bool paddingBottom;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,7 @@ class CardView extends StatelessWidget {
                                 ? cardBuilder!.call(context, entry.key, ctrl.columns, row)
                                 : CardCell(ctrl: ctrl, row: row);
 
-                            if (entry.key == ctrl.rows.sublist(1).length - 1) {
+                            if (entry.key == ctrl.rows.sublist(1).length - 1 && paddingBottom) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 80),
                                 child: w,

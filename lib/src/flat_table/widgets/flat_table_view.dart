@@ -36,6 +36,7 @@ class FlatTableView extends StatelessWidget {
     this.cardBuilder,
     this.detailBuilder,
     this.padding,
+    this.paddingBottom = true,
   });
 
   final List<Widget> actions;
@@ -51,6 +52,7 @@ class FlatTableView extends StatelessWidget {
   final bool showConfig;
   final bool showHeader;
   final bool compactMode;
+  final bool paddingBottom;
 
   @override
   Widget build(BuildContext context) {
