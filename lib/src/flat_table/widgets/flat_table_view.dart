@@ -285,7 +285,7 @@ class FlatTableView extends StatelessWidget {
                             );
                           }
                           if (cardView) {
-                            return CardView(ctrl, cardBuilder: cardBuilder);
+                            return CardView(ctrl, cardBuilder: cardBuilder, paddingBottom: paddingBottom);
                           }
 
                           return FlatTable(ctrl, builders: builders);
