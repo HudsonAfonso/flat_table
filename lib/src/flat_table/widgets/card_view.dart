@@ -76,7 +76,7 @@ class CardView extends StatelessWidget {
                                 ? cardBuilder!.call(context, entry.key, ctrl.columns, row)
                                 : CardCell(ctrl: ctrl, row: row);
 
-                            if (entry.key == ctrl.rows.sublist(1).length - 1 && paddingBottom) {
+                            if ((entry.key == ctrl.rows.sublist(1).length - 1) && paddingBottom) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 80),
                                 child: w,
